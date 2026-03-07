@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Results — Marks Predictor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0b0f1a;
+      --card: #111827;
+      --border: #1f2d45;
+      --accent: #4fffb0;
+      --accent2: #38bdf8;
+      --text: #e8f0fe;
+      --muted: #6b7fa8;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+      background-image:
+        radial-gradient(ellipse at 15% 15%, rgba(56,189,248,0.07) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 85%, rgba(79,255,176,0.06) 0%, transparent 50%);
+    }
+
+    /* ---- BACK BUTTON ---- */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 36px;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--accent2); }
+    .back-btn svg { width: 16px; height: 16px; }
+
+    /* ---- SCORE HERO ---- */
+    .score-hero {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeDown 0.6s ease both;
+    }
+
+    .score-hero .label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .score-ring {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent) var(--pct, 0%), #1f2d45 0%);
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .score-ring::after {
+      content: '';
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      background: var(--bg);
+      border-radius: 50%;
+    }
+
+    .score-number {
+      position: relative;
+      z-index: 1;
+      font-family: 'Syne', sans-serif;
+      font-size: 38px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .score-number span {
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .score-hero h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 800;
+      background: linear-gradient(135deg, #e8f0fe 0%, var(--accent2) 50%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .top-factor {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(79,255,176,0.08);
+      border: 1px solid rgba(79,255,176,0.2);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 12px;
+      color: var(--accent);
+      margin-top: 12px;
+    }
+
+    /* ---- LAYOUT ---- */
+    .content { max-width: 800px; margin: 0 auto; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.6s ease both;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+    }
+
+    .card:nth-child(2) { animation-delay: 0.1s; }
+    .card:nth-child(3) { animation-delay: 0.2s; }
+    .card:nth-child(4) { animation-delay: 0.3s; }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ---- SUGGESTION TEXT ---- */
+    .suggestion-text {
+      font-size: 14px;
+      line-height: 1.8;
+      color: #c5d3ed;
+      white-space: pre-wrap;
+    }
+
+    .suggestion-text strong, .suggestion-text b {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ---- STUDENT SUMMARY GRID ---- */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .summary-item {
+      background: var(--input-bg, #0d1525);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .summary-item .s-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .summary-item .s-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      text-transform: capitalize;
+    }
+
+    /* ---- TRY AGAIN ---- */
+    .try-again {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: border-color 0.2s, color 0.2s;
+      text-align: center;
+      text-decoration: none;
+    }
+    .try-again:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    /* ---- NO DATA ---- */
+    .no-data {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+    .no-data h2 { font-family: 'Syne', sans-serif; font-size: 22px; margin-bottom: 12px; color: var(--text); }
+
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:none; } }
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(20px);  } to { opacity:1; transform:none; } }
+  </style>
+</head>
+<body>
+
+  <div class="content">
+    <a href="index.html" class="back-btn">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      Back to Form
+    </a>
+
+    <div id="mainContent"></div>
+  </div>
+
+  <script>
+    const resultRaw = localStorage.getItem('predictionResult');
+    const inputRaw  = localStorage.getItem('studentInput');
+    const container = document.getElementById('mainContent');
+
+    if (!resultRaw) {
+      container.innerHTML = `
+        <div class="no-data">
+          <h2>No Results Found</h2>
+          <p>Please go back and fill in the form first.</p>
+          <a href="index.html" class="try-again" style="margin-top:24px; display:inline-block; padding:12px 28px; width:auto;">Go to Form</a>
+        </div>`;
+    } else {
+      const result = JSON.parse(resultRaw);
+      const input  = inputRaw ? JSON.parse(inputRaw) : {};
+
+      const marks      = result.predicted_marks ?? 0;
+      const suggestion = result.suggestion      ?? 'No suggestion available.';
+      const topFactor  = result.top_factor      ?? 'study_hours';
+      const pct        = Math.min(Math.round(marks), 100);
+
+      // Grade label
+      let grade = 'Needs Improvement';
+      if (marks >= 90) grade = 'Excellent 🏆';
+      else if (marks >= 75) grade = 'Very Good 🎯';
+      else if (marks >= 60) grade = 'Good 👍';
+      else if (marks >= 45) grade = 'Average 📚';
+
+      // Format top factor name
+      const topFactorLabel = topFactor.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+      // Build summary items
+      const summaryFields = [
+        { label: 'Age',              value: input.age              || '—' },
+        { label: 'Gender',           value: input.gender           || '—' },
+        { label: 'Course',           value: input.course           || '—' },
+        { label: 'Study Hours',      value: (input.study_hours     || '—') + ' hrs/day' },
+        { label: 'Attendance',       value: (input.class_attendance|| '—') + '%' },
+        { label: 'Sleep Hours',      value: (input.sleep_hours     || '—') + ' hrs' },
+        { label: 'Sleep Quality',    value: input.sleep_quality    || '—' },
+        { label: 'Study Method',     value: input.study_method     || '—' },
+        { label: 'Internet Access',  value: input.internet_access  || '—' },
+        { label: 'Facility Rating',  value: input.facility_rating  || '—' },
+        { label: 'Exam Difficulty',  value: input.exam_difficulty  || '—' },
+      ];
+
+      const summaryHTML = summaryFields.map(f => `
+        <div class="summary-item">
+          <div class="s-label">${f.label}</div>
+          <div class="s-value">${f.value}</div>
+        </div>`).join('');
+
+      container.innerHTML = `
+        <!-- Score Hero -->
+        <div class="score-hero">
+          <div class="label">Your Predicted Score</div>
+          <div class="score-ring" style="--pct: ${pct}%">
+            <div class="score-number">${marks.toFixed(1)}<span>%</span></div>
+          </div>
+          <h2>${grade}</h2>
+          <div class="top-factor">⚡ Top Factor: ${topFactorLabel}</div>
+        </div>
+
+        <!-- AI Suggestion -->
+        <div class="card">
+          <div class="card-title">🤖 AI Mentor Feedback</div>
+          <div class="suggestion-text">${formatSuggestion(suggestion)}</div>
+        </div>
+
+        <!-- Student Summary -->
+        <div class="card">
+          <div class="card-title">📋 Your Input Summary</div>
+          <div class="summary-grid">${summaryHTML}</div>
+        </div>
+
+        <!-- Try Again -->
+        <a href="index.html" class="try-again">← Predict Again with Different Values</a>
+      `;
+
+      // Animate the score ring
+      setTimeout(() => {
+        const ring = document.querySelector('.score-ring');
+        if (ring) ring.style.transition = 'background 1s ease';
+      }, 100);
+    }
+
+    // Format Gemini's markdown-style response nicely
+    function formatSuggestion(text) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/^(\d+\.\s)/gm, '<br><strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Marks Predictor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0b0f1a;
+      --card: #111827;
+      --border: #1f2d45;
+      --accent: #4fffb0;
+      --accent2: #38bdf8;
+      --text: #e8f0fe;
+      --muted: #6b7fa8;
+      --input-bg: #0d1525;
+      --error: #ff6b6b;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 20px 60px;
+      background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(56, 189, 248, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(79, 255, 176, 0.05) 0%, transparent 50%);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeDown 0.7s ease both;
+    }
+
+    header .badge {
+      display: inline-block;
+      background: rgba(79,255,176,0.1);
+      border: 1px solid rgba(79,255,176,0.3);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 800;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #e8f0fe 0%, var(--accent2) 50%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      color: var(--muted);
+      margin-top: 10px;
+      font-size: 15px;
+    }
+
+    .form-card {
+      max-width: 760px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      animation: fadeUp 0.7s ease 0.1s both;
+      box-shadow: 0 0 60px rgba(0,0,0,0.4);
+    }
+
+    .section-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+    @media (max-width: 600px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .form-card { padding: 24px; }
+    }
+
+    .field { display: flex; flex-direction: column; gap: 7px; }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    input, select {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+      appearance: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(56,189,248,0.1);
+    }
+
+    select option { background: #111827; }
+
+    .divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      border: none;
+      border-radius: 12px;
+      color: #0b0f1a;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .submit-btn .spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+
+    .submit-btn.loading .btn-text { display: none; }
+    .submit-btn.loading .spinner { display: block; }
+
+    .error-msg {
+      display: none;
+      background: rgba(255,107,107,0.1);
+      border: 1px solid rgba(255,107,107,0.3);
+      color: var(--error);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    /* ---- IMPORTANT: Replace YOUR_NGROK_URL with your actual ngrok URL ---- */
+    /* Example: https://abc123.ngrok-free.app                                  */
+
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:none; } }
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(20px);  } to { opacity:1; transform:none; } }
+    @keyframes spin     { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">AI Powered</div>
+    <h1>Student Marks Predictor</h1>
+    <p>Enter your details to get your predicted marks & personalized suggestions</p>
+  </header>
+
+  <div class="form-card">
+
+    <!-- SECTION 1: Personal Info -->
+    <div class="section-label">Personal Information</div>
+    <div class="grid-3">
+      <div class="field">
+        <label for="age">Age</label>
+        <input type="number" id="age" placeholder="e.g. 20" min="15" max="40" required />
+      </div>
+      <div class="field">
+        <label for="gender">Gender</label>
+        <select id="gender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="course">Course</label>
+        <select id="course">
+          <option value="b.tech">B.Tech</option>
+          <option value="bca">BCA</option>
+          <option value="b.sc">B.Sc</option>
+          <option value="bba">BBA</option>
+          <option value="b.com">B.Com</option>
+          <option value="ba">BA</option>
+          <option value="diploma">Diploma</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 2: Academic Info -->
+    <div class="section-label">Academic Details</div>
+    <div class="grid-2">
+      <div class="field">
+        <label for="study_hours">Study Hours / Day</label>
+        <input type="number" id="study_hours" placeholder="e.g. 5" min="0" max="24" step="0.5" required />
+      </div>
+      <div class="field">
+        <label for="class_attendance">Class Attendance (%)</label>
+        <input type="number" id="class_attendance" placeholder="e.g. 85" min="0" max="100" required />
+      </div>
+      <div class="field">
+        <label for="study_method">Study Method</label>
+        <select id="study_method">
+          <option value="self-study">Self Study</option>
+          <option value="group study">Group Study</option>
+          <option value="coaching">Coaching</option>
+          <option value="online videos">Online Videos</option>
+          <option value="mixed">Mixed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="exam_difficulty">Exam Difficulty</label>
+        <select id="exam_difficulty">
+          <option value="easy">Easy</option>
+          <option value="moderate">Moderate</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 3: Lifestyle -->
+    <div class="section-label">Lifestyle & Environment</div>
+    <div class="grid-3">
+      <div class="field">
+        <label for="sleep_hours">Sleep Hours / Night</label>
+        <input type="number" id="sleep_hours" placeholder="e.g. 7" min="2" max="12" step="0.5" required />
+      </div>
+      <div class="field">
+        <label for="sleep_quality">Sleep Quality</label>
+        <select id="sleep_quality">
+          <option value="good">Good</option>
+          <option value="average">Average</option>
+          <option value="poor">Poor</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="internet_access">Internet Access</label>
+        <select id="internet_access">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div class="field">
+        <label for="facility_rating">Facility Rating</label>
+        <select id="facility_rating">
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+      <span class="btn-text">Predict My Marks →</span>
+      <div class="spinner"></div>
+    </button>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+  </div>
+
+  <script>
+    // ================================================================
+    // ⚠️  REPLACE THIS URL WITH YOUR ACTUAL NGROK URL FROM COLAB
+    // ================================================================
+    const FLASK_URL = "http://localhost:5000";
+    // ================================================================
+
+    async function submitForm() {
+      const btn = document.getElementById('submitBtn');
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.style.display = 'none';
+
+      // Collect all values
+      const data = {
+        age              : document.getElementById('age').value,
+        gender           : document.getElementById('gender').value,
+        course           : document.getElementById('course').value,
+        study_hours      : document.getElementById('study_hours').value,
+        class_attendance : document.getElementById('class_attendance').value,
+        sleep_hours      : document.getElementById('sleep_hours').value,
+        sleep_quality    : document.getElementById('sleep_quality').value,
+        internet_access  : document.getElementById('internet_access').value,
+        study_method     : document.getElementById('study_method').value,
+        facility_rating  : document.getElementById('facility_rating').value,
+        exam_difficulty  : document.getElementById('exam_difficulty').value,
+      };
+
+      // Basic validation
+      if (!data.age || !data.study_hours || !data.class_attendance || !data.sleep_hours) {
+        errorMsg.textContent = "Please fill in all required fields.";
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      if (parseFloat(data.class_attendance) > 100) {
+        errorMsg.textContent = "Class attendance cannot exceed 100%.";
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      // Show loading
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(`${FLASK_URL}/predict`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          // Save to localStorage and go to results page
+          localStorage.setItem('predictionResult', JSON.stringify(result));
+          localStorage.setItem('studentInput', JSON.stringify(data));
+          window.location.href = 'results.html';
+        } else {
+          throw new Error(result.error || 'Prediction failed');
+        }
+
+      } catch (err) {
+        errorMsg.textContent = `Error: ${err.message}. Make sure your Colab is running!`;
+        errorMsg.style.display = 'block';
+      } finally {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    }
+  </script>
+
+</body>
+</html>
